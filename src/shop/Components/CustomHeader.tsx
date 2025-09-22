@@ -25,25 +25,25 @@ export const CustomHeader = () => {
               href='#'
               className='text-sm font-medium transition-colors hover:text-primary'
             >
-              Camisetas
+              T-Shirts
             </a>
             <a
               href='#'
               className='text-sm font-medium transition-colors hover:text-primary'
             >
-              Sudaderas
+              Hoodies
             </a>
             <a
               href='#'
               className='text-sm font-medium transition-colors hover:text-primary'
             >
-              Chaquetas
+              Jackets
             </a>
             <a
               href='#'
               className='text-sm font-medium transition-colors hover:text-primary'
             >
-              Accesorios
+              Accessories
             </a>
           </nav>
 
@@ -53,7 +53,7 @@ export const CustomHeader = () => {
               <div className='relative'>
                 <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
                 <Input
-                  placeholder='Buscar productos...'
+                  placeholder='Search products...'
                   className='pl-9 w-64 h-9'
                 />
               </div>
