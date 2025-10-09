@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { CustomLogo } from '@/components/custom/CustomLogo';
 import { Link, useLocation } from 'react-router';
+import path from 'path';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -38,6 +39,9 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
   const isActiveRoute = (to: string) => {
     // TODO, adjust when in products
+    if (pathname.includes('/admin/products') && to === '/admin/products') {
+      return true;
+    }
     return pathname === to;
   };
 
