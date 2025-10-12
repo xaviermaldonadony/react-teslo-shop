@@ -8,17 +8,16 @@ interface Options {
   gender?: string;
   minPrice?: number;
   maxPrice?: number;
+  query?: string;
 }
 
 export const getProductsAction = async (
   options: Options
 ): Promise<ProductResponse> => {
-  const { limit, offset, sizes, gender, minPrice, maxPrice } = options;
-
-  console.log({ minPrice, maxPrice });
+  const { limit, offset, sizes, gender, minPrice, maxPrice, query } = options;
 
   const { data } = await tesloApi.get<ProductResponse>('/products', {
-    params: { limit, offset, sizes, gender, minPrice, maxPrice },
+    params: { limit, offset, sizes, gender, minPrice, maxPrice, q: query },
   });
 
   const productsWithImageUrls = data.products.map((p) => ({
@@ -27,8 +26,6 @@ export const getProductsAction = async (
       (img) => `${import.meta.env.VITE_API_URL}/files/product/${img}`
     ),
   }));
-  console.log(data);
-  console.log(productsWithImageUrls);
 
   return {
     ...data,
