@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CustomLogo } from '@/components/custom/CustomLogo';
 
-import { loginAction } from '@/auth/actions/login.action';
+import { useAuthStore } from '@/auth/store/auth.store';
 
 export const LoginPage = () => {
+  const { login } = useAuthStore();
   const navigate = useNavigate();
   const [isPosting, setIsPosting] = useState(false);
 
@@ -22,15 +23,13 @@ export const LoginPage = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    try {
-      const data = await loginAction(email, password);
-      localStorage.setItem('token', data.token);
-      console.log('redirect');
+    const isValid = await login(email, password);
+    if (isValid) {
       navigate('/');
-    } catch (error) {
-      console.log(error);
-      toast.error('Invalid credentials');
+      return;
     }
+
+    toast.error('Invalid credentials');
     setIsPosting(false);
   };
 
