@@ -1,17 +1,41 @@
+import { type PropsWithChildren } from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { RouterProvider } from 'react-router';
 import { appRouter } from './app.router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from '@tanstack/react-query';
 import { Toaster } from 'sonner';
+import { checkAuthAction } from './auth/actions/check-auth.action';
+import { CusomFullScreenLoading } from './components/custom/CusomFullScreenLoading';
 
 const queryClient = new QueryClient();
+
+// custom Provider
+const CheckAuthProvided = ({ children }: PropsWithChildren) => {
+  const { isLoading } = useQuery({
+    queryKey: ['auth'],
+    queryFn: checkAuthAction,
+    retry: false,
+    refetchInterval: 1000 * 60 * 1.5, // 1.5 hours
+    refetchOnWindowFocus: true,
+  });
+
+  if (isLoading) return <CusomFullScreenLoading />;
+
+  return children;
+};
 
 export const TesloShop = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster />
-      <RouterProvider router={appRouter} />;
+      <CheckAuthProvided>
+        <RouterProvider router={appRouter} />;
+      </CheckAuthProvided>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
