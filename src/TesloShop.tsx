@@ -9,16 +9,18 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
-import { checkAuthAction } from './auth/actions/check-auth.action';
 import { CusomFullScreenLoading } from './components/custom/CusomFullScreenLoading';
+import { useAuthStore } from './auth/store/auth.store';
 
 const queryClient = new QueryClient();
 
 // custom Provider
 const CheckAuthProvided = ({ children }: PropsWithChildren) => {
+  const { checkAuthStatus } = useAuthStore();
+
   const { isLoading } = useQuery({
     queryKey: ['auth'],
-    queryFn: checkAuthAction,
+    queryFn: checkAuthStatus,
     retry: false,
     refetchInterval: 1000 * 60 * 1.5, // 1.5 hours
     refetchOnWindowFocus: true,
