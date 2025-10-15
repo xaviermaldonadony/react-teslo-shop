@@ -9,7 +9,7 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
-import { CusomFullScreenLoading } from './components/custom/CusomFullScreenLoading';
+import { CustomFullScreenLoading } from './components/custom/CustomFullScreenLoading';
 import { useAuthStore } from './auth/store/auth.store';
 
 const queryClient = new QueryClient();
@@ -26,7 +26,7 @@ const CheckAuthProvided = ({ children }: PropsWithChildren) => {
     refetchOnWindowFocus: true,
   });
 
-  if (isLoading) return <CusomFullScreenLoading />;
+  if (isLoading) return <CustomFullScreenLoading />;
 
   return children;
 };
