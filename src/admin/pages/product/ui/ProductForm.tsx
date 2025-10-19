@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { useForm } from 'react-hook-form';
 
@@ -8,6 +8,10 @@ import type { Product, Size } from '@/interfaces/product.interface';
 import { SaveAll, Tag, Upload, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+interface FormInputs extends Product {
+  files?: File[];
+}
+
 interface Props {
   title: string;
   subTitle: string;
@@ -15,7 +19,7 @@ interface Props {
   isPending: boolean;
 
   // methods
-  onSubmit: (product: Partial<Product>) => Promise<void>;
+  onSubmit: (product: Partial<Product> & { files?: File[] }) => Promise<void>;
 }
 
 const availableSizes: Size[] = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -27,7 +31,6 @@ export const ProductForm = ({
   onSubmit,
   isPending,
 }: Props) => {
-  console.log({ product });
   const [dragActive, setDragActive] = useState(false);
   const {
     register,
@@ -36,15 +39,20 @@ export const ProductForm = ({
     getValues,
     setValue,
     watch,
-  } = useForm({
+  } = useForm<FormInputs>({
     defaultValues: product,
   });
 
   const labelInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setValue('files', []);
+  }, [product]);
+
   const selectedSizes = watch('sizes');
   const selectedTags = watch('tags');
   const currentStock = watch('stock');
+  const files = watch('files') || [];
 
   const addTag = () => {
     const newTag = labelInputRef.current!.value;
@@ -93,12 +101,23 @@ export const ProductForm = ({
     e.stopPropagation();
     setDragActive(false);
     const files = e.dataTransfer.files;
-    console.log(files);
+
+    if (!files) return;
+
+    // setFiles((prev) => [...prev, ...Array.from(files)]);
+
+    const currentFiles = getValues('files') || [];
+    setValue('files', [...currentFiles, ...Array.from(files)]);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    console.log(files);
+
+    if (!files) return;
+    // setFiles((prev) => [...prev, ...Array.from(files)]);
+
+    const currentFiles = getValues('files') || [];
+    setValue('files', [...currentFiles, ...Array.from(files)]);
   };
 
   return (
@@ -432,10 +451,28 @@ export const ProductForm = ({
                       <button className='absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
                         <X className='h-3 w-3' />
                       </button>
-                      <p className='mt-1 text-xs text-slate-600 truncate'>
-                        {image}
-                      </p>
                     </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Images to be uploaded */}
+              <div
+                className={cn('mt-6 space-y-3', {
+                  hidden: files.length === 0,
+                })}
+              >
+                <h3 className='text-sm font-medium text-slate-700'>
+                  Images to uploaded
+                </h3>
+                <div className='grid grid-cols-2 gap-3'>
+                  {files.map((file, index) => (
+                    <img
+                      src={URL.createObjectURL(file)}
+                      key={index}
+                      alt='Product'
+                      className='w-full h-full object-cover rounded-lg'
+                    />
                   ))}
                 </div>
               </div>

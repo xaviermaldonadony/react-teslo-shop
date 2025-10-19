@@ -11,7 +11,6 @@ export const AdminHeader: React.FC = () => {
     if (e.key !== 'Enter') return;
 
     const query = inputRef.current?.value;
-    console.log(query);
 
     if (!query) {
       navigate('/admin/products');

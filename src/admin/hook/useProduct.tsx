@@ -17,7 +17,6 @@ export const useProduct = (id: string) => {
   const mutation = useMutation({
     mutationFn: createUpdateProductAction,
     onSuccess: (product: Product) => {
-      // console.log('product saved', product);
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({
         queryKey: ['products', { id: product.id }],
@@ -29,14 +28,7 @@ export const useProduct = (id: string) => {
     onError: (error) => {
       console.log('error on mutation', error);
     },
-    // To do
-    // Invalidate cache
-    //update querydata
   });
-
-  // const handleSubmitForm = async (product: Partial<Product>) => {
-  //   console.log({ product });
-  // };
 
   return {
     ...query,
