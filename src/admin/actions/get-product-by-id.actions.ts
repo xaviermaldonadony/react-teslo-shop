@@ -21,13 +21,15 @@ export const getProductByIdAction = async (id: string): Promise<Product> => {
 
   const { data } = await tesloApi.get<Product>(`/products/${id}`);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { user, ...rest } = data;
   const images = data.images.map((img) => {
     if (img.includes('http')) return img;
     return `${import.meta.env.VITE_API_URL}/files/product/${img}`;
   });
 
   return {
-    ...data,
+    ...rest,
     images,
-  };
+  } as Product;
 };

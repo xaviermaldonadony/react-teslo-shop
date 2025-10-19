@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { useForm } from 'react-hook-form';
 
@@ -12,11 +12,21 @@ interface Props {
   title: string;
   subTitle: string;
   product: Product;
+  isPending: boolean;
+
+  // methods
+  onSubmit: (product: Partial<Product>) => Promise<void>;
 }
 
 const availableSizes: Size[] = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-export const ProductForm = ({ title, subTitle, product }: Props) => {
+export const ProductForm = ({
+  title,
+  subTitle,
+  product,
+  onSubmit,
+  isPending,
+}: Props) => {
   console.log({ product });
   const [dragActive, setDragActive] = useState(false);
   const {
@@ -30,22 +40,28 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
     defaultValues: product,
   });
 
+  const labelInputRef = useRef<HTMLInputElement>(null);
+
   const selectedSizes = watch('sizes');
+  const selectedTags = watch('tags');
+  const currentStock = watch('stock');
 
   const addTag = () => {
-    if (newTag.trim() && !product.tags.includes(newTag.trim())) {
-      //   setProduct((prev) => ({
-      //     ...prev,
-      //     tags: [...prev.tags, newTag.trim()],
-      //   }));
-    }
+    const newTag = labelInputRef.current!.value;
+    if (newTag === ' ') return;
+
+    const tagSet = new Set(getValues('tags'));
+
+    tagSet.add(newTag);
+    setValue('tags', Array.from(tagSet));
+    labelInputRef.current!.value = '';
   };
 
-  const removeTag = (tagToRemove: string) => {
-    // setProduct((prev) => ({
-    //   ...prev,
-    //   tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    // }));
+  const removeTag = (tag: string) => {
+    const tagSet = new Set(getValues('tags'));
+
+    tagSet.delete(tag);
+    setValue('tags', Array.from(tagSet));
   };
 
   const addSize = (size: Size) => {
@@ -55,11 +71,11 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
     setValue('sizes', Array.from(sizeSet));
   };
 
-  const removeSize = (sizeToRemove: string) => {
-    // setProduct((prev) => ({
-    //   ...prev,
-    //   sizes: prev.sizes.filter((size) => size !== sizeToRemove),
-    // }));
+  const removeSize = (size: Size) => {
+    const sizeSet = new Set(getValues('sizes'));
+
+    sizeSet.delete(size);
+    setValue('sizes', Array.from(sizeSet));
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -85,24 +101,23 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
     console.log(files);
   };
 
-  // remove later on
-
-  const onSubmit = (productLike: Product) => {
-    console.log('onSubmit', productLike);
-  };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className='flex justify-between items-center'>
         <AdminTitle title={title} subTitle={subTitle} />
         <div className='flex justify-end mb-10 gap-4'>
-          <Button variant='outline'>
+          <Button variant='outline' type='button'>
             <Link to='/admin/products' className='flex items-center gap-2'>
               <X className='w-4 h-4' />
               Cancel
             </Link>
           </Button>
 
-          <Button className='bg-blue-500 hover:bg-blue-600 text-white'>
+          <Button
+            type='submit'
+            disabled={isPending}
+            className='bg-blue-500 hover:bg-blue-600 text-white'
+          >
             <SaveAll className='w-4 h-4' />
             Save Changes
           </Button>
@@ -171,7 +186,7 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
                     </label>
                     <input
                       type='number'
-                      {...register('stock', { required: true, min: 0 })}
+                      {...register('stock', { required: true, min: 1 })}
                       className={cn(
                         'w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200',
                         {
@@ -182,7 +197,7 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
                     />
                     {errors.stock && (
                       <p className='text-red-500 text-sm'>
-                        Stock should be at least 0
+                        Stock should be at least 1
                       </p>
                     )}
                   </div>
@@ -275,8 +290,8 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
                     >
                       {size}
                       <button
-                        // onClick={() => removeSize(size)}
-                        className='ml-2 text-blue-600 hover:text-blue-800 transition-colors duration-200'
+                        onClick={() => removeSize(size)}
+                        className='cursor-pointer  ml-2 text-blue-600 hover:text-blue-800 transition-colors duration-200'
                       >
                         <X className='h-3 w-3' />
                       </button>
@@ -315,7 +330,7 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
 
               <div className='space-y-4'>
                 <div className='flex flex-wrap gap-2'>
-                  {product.tags.map((tag) => (
+                  {selectedTags.map((tag) => (
                     <span
                       key={tag}
                       className='inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200'
@@ -323,7 +338,7 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
                       <Tag className='h-3 w-3 mr-1' />
                       {tag}
                       <button
-                        // onClick={() => removeTag(tag)}
+                        onClick={() => removeTag(tag)}
                         className='ml-2 text-green-600 hover:text-green-800 transition-colors duration-200'
                       >
                         <X className='h-3 w-3' />
@@ -334,10 +349,18 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
 
                 <div className='flex gap-2'>
                   <input
+                    ref={labelInputRef}
                     type='text'
-                    // value={newTag}
-                    // onChange={(e) => setNewTag(e.target.value)}
-                    // onKeyDown={(e) => e.key === 'Enter' && addTag()}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === 'Enter' ||
+                        e.key === ' ' ||
+                        e.key === ', '
+                      ) {
+                        e.preventDefault();
+                        addTag();
+                      }
+                    }}
                     placeholder='Add new tag...'
                     className='flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200'
                   />
@@ -440,14 +463,14 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
                   </span>
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      product.stock > 5
+                      currentStock > 5
                         ? 'bg-green-100 text-green-800'
                         : product.stock > 0
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {product.stock > 5
+                    {currentStock > 5
                       ? 'In stock'
                       : product.stock > 0
                       ? 'Low stock'
@@ -469,7 +492,7 @@ export const ProductForm = ({ title, subTitle, product }: Props) => {
                     Available sizes
                   </span>
                   <span className='text-sm text-slate-600'>
-                    {product.sizes.length} sizes
+                    {selectedSizes.length} sizes
                   </span>
                 </div>
               </div>
