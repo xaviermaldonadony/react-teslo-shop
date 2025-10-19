@@ -9,7 +9,7 @@ import { useAuthStore } from '@/auth/store/auth.store';
 
 export const CustomHeader = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user, isAdmin, authStatus, logout } = useAuthStore();
+  const { isAdmin, authStatus, logout } = useAuthStore();
   const { gender } = useParams();
 
   const inputRef = useRef<HTMLInputElement>(null);

@@ -4,7 +4,7 @@ interface Props {
   subtitle?: string;
 }
 
-export const CustomLogo = ({ subtitle = 'Shop' }) => {
+export const CustomLogo = ({ subtitle = 'Shop' }: Props) => {
   return (
     <Link to='/' className='flex items-center whitespace-nowrap'>
       <span className='font-monserat font-bold text-xl m-0 whitespace-nowrap'>
